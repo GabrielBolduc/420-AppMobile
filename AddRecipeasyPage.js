@@ -12,8 +12,8 @@ export default function Page3() {
   const [description, setDescription] = React.useState('');
 
   const radioOptions = [
-    { id: '1', label: 'Breakfast', value: 'breakfast', borderColor: 'rgba(255,255,255,0.9)' },
-    { id: '2', label: 'Lunch',     value: 'lunch', borderColor: 'rgba(255,255,255,0.9)' },
+    { id: '1', label: 'Breakfast', value: 'breakfast', borderColor: WHITE },
+    { id: '2', label: 'Lunch',     value: 'lunch', borderColor: 'rrgba(255,255,255,0.9)' },
     { id: '3', label: 'Dinner',    value: 'dinner', borderColor: 'rgba(255,255,255,0.9)' },
   ];
 
@@ -73,7 +73,6 @@ export default function Page3() {
         value={description}
         onChangeText={setDescription} 
         multiline                       
-        numberOfLines={6}
       />
 
 
