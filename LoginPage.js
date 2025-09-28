@@ -10,7 +10,6 @@ export default function LoginPage({ navigation }) {
   function handleSignUpPressed() {
     navigation.navigate('SignUp');
   }
-
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>

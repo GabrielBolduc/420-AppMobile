@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RadioGroup from 'react-native-radio-buttons-group';
 import { Picker } from '@react-native-picker/picker';
 
-export default function Page3() {
+export default function AddRecipeasy() {
   const [mealType, setMealType] = React.useState(null); 
   const [name, setName] = React.useState('');
   const [hours, setHours] = React.useState('0');
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     fontWeight: '700' 
   },
   textArea: { 
-    minHeight: 400, 
+    minHeight: 300, 
     textAlignVertical: 'top' 
   },
 
