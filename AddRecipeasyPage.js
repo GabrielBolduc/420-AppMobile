@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RadioGroup from 'react-native-radio-buttons-group';
 import { Picker } from '@react-native-picker/picker';
 
-export default function AddRecipeasy() {
-  const [mealType, setMealType] = React.useState(null); 
+export default function AddRecipeasy({ navigation, route }) {
+  const [mealType, setMealType] = React.useState(null);
   const [name, setName] = React.useState('');
   const [hours, setHours] = React.useState('0');
   const [minutes, setMinutes] = React.useState('0');
@@ -13,18 +13,39 @@ export default function AddRecipeasy() {
 
   const radioOptions = [
     { id: '1', label: 'Breakfast', value: 'breakfast', borderColor: WHITE },
-    { id: '2', label: 'Lunch',     value: 'lunch', borderColor: 'rrgba(255,255,255,0.9)' },
-    { id: '3', label: 'Dinner',    value: 'dinner', borderColor: 'rgba(255,255,255,0.9)' },
+    { id: '2', label: 'Lunch',     value: 'lunch',     borderColor: 'rgba(255,255,255,0.9)' },
+    { id: '3', label: 'Dinner',    value: 'dinner',    borderColor: 'rgba(255,255,255,0.9)' },
   ];
+
+  const handleMealType = (arg) => {
+    if (Array.isArray(arg)) {
+      const sel = arg.find(b => b.selected);
+      setMealType(sel ? sel.id : null);
+    } else {
+      setMealType(arg);
+    }
+  };
+
+  function handleSave() {
+    const recipe = {
+      category: mealType ? parseInt(mealType, 10) : null,
+      name: name.trim(),
+      durationHours: parseInt(hours, 10) || 0,
+      durationMinutes: parseInt(minutes, 10) || 0,
+      description: description.trim(),
+    };
+    // Envoi a la liste
+    navigation.navigate('RecipeList', { action: 'save', recipe });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <RadioGroup
         radioButtons={radioOptions}
-        selectedId={mealType} 
-        onPress={setMealType}
+        selectedId={mealType}
+        onPress={handleMealType}
         layout="row"
-        labelStyle={styles.radioLabel} 
+        labelStyle={styles.radioLabel}
       />
 
       <TextInput
@@ -66,18 +87,16 @@ export default function AddRecipeasy() {
       </View>
 
       <TextInput
-
         style={[styles.input, styles.inputWhite, styles.textArea]}
         placeholder="Description"
         placeholderTextColor="rgba(255,255,255,0.85)"
         value={description}
-        onChangeText={setDescription} 
-        multiline                       
+        onChangeText={setDescription}
+        multiline
       />
 
-
       <View style={{ marginTop: 20 }}>
-        <Button title="Save" color = "#fce307ff"/>
+        <Button title="Save" color="#fce307ff" onPress={handleSave} />
       </View>
     </SafeAreaView>
   );

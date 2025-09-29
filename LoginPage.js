@@ -4,7 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginPage({ navigation }) {
   function handleLoginPressed() {
-    navigation.navigate('AddRecipeasy');
+    navigation.navigate('RecipeList');
   }
 
   function handleSignUpPressed() {
