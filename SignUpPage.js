@@ -4,7 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SignUpPage({ navigation }) {
   function handleCreateMyAccountPressed() {
-    navigation.navigate('AddRecipeasy')
+    navigation.navigate('RecipeList')
   }
   return (
     <SafeAreaProvider>

@@ -1,39 +1,19 @@
-// RecipeListPage.js
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const PAGE = '#009356ff';
 
-export default function RecipeListPage({ navigation, route }) {
+export default function RecipeListPage({ navigation }) {
   const [recipes, setRecipes] = useState([]);
 
-  useEffect(() => {
-    const action = route?.params?.action;
-    if (action !== 'save') return;
-
-    const r = route?.params?.recipe;
-    if (!r) return;
-
-    setRecipes(prev => {
-      const i = prev.findIndex(
-        x => x.name?.trim().toLowerCase() === r.name?.trim().toLowerCase()
-      );
-      if (i >= 0) {
-        const copy = [...prev];
-        copy[i] = r;
-        return copy;
-      }
-      return [...prev, r];
-    });
-
-    navigation.setParams({ action: undefined, recipe: undefined });
-  }, [route?.params?.action, navigation]);
-
+  // Tri par nom (ordre croissant)
   const sorted = useMemo(
     () => [...recipes].sort((a, b) => a.name.localeCompare(b.name)),
     [recipes]
   );
+
+  // Header Log out uniquement
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Recipes',
@@ -47,13 +27,20 @@ export default function RecipeListPage({ navigation, route }) {
     });
   }, [navigation]);
 
+  // Ouvre un detail en lecture
   function handleViewRandom() {
     if (sorted.length === 0) return;
     const r = sorted[Math.floor(Math.random() * sorted.length)];
     navigation.navigate('AddRecipeasy', { mode: 'view', recipe: r });
   }
+
   function handleAdd() {
-    navigation.navigate('AddRecipeasy', { mode: 'add' });
+    navigation.navigate('AddRecipeasy', {
+      mode: 'add',
+      onSave: (recipe) => {
+        setRecipes(prev => [...prev, recipe]); 
+      },
+    });
   }
 
   return (
