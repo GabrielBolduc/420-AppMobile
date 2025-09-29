@@ -11,8 +11,8 @@ export default function AddRecipeasyPage({ navigation, route }) {
   const [minutes, setMinutes] = React.useState('0');
   const [description, setDescription] = React.useState('');
 
-  const mode   = route?.params?.mode ?? 'add';        // 'add' | 'view'
-  const onSave = route?.params?.onSave;               // callback reçu de la liste
+  const mode   = route?.params?.mode ?? 'add'; // Mode add / view
+  const onSave = route?.params?.onSave;  // callback reçu de la liste 
 
   // Préremplir en view, vider en add
   React.useEffect(() => {
@@ -122,7 +122,7 @@ export default function AddRecipeasyPage({ navigation, route }) {
           style={[styles.picker, styles.inputWhite]}
           dropdownIconColor="#fff"
         >
-          {[0, 15, 30, 45].map(m => (
+          {Array.from({ length: 60 }, (_, m) => (
             <Picker.Item key={m} label={`${m} mins`} value={String(m)} />
           ))}
         </Picker>

@@ -18,19 +18,20 @@ export default function RecipeListPage({ navigation }) {
     navigation.setOptions({
       title: 'Recipes',
       headerBackVisible: false,
-      headerLeft: () => (
+      headerRight: () => (
         <Button
           title="Log out"
           onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Login' }] })}
         />
       ),
+      headerLeft: () => null,
     });
   }, [navigation]);
 
-  // Ouvre un detail en lecture
+  // Ouvre un detail en View
   function handleViewRandom() {
     if (sorted.length === 0) return;
-    const r = sorted[Math.floor(Math.random() * sorted.length)];
+    const r = sorted[Math.floor(Math.random() * sorted.length)]; // Index aleatoire entre 0 et sorted.length
     navigation.navigate('AddRecipeasy', { mode: 'view', recipe: r });
   }
 
@@ -38,7 +39,7 @@ export default function RecipeListPage({ navigation }) {
     navigation.navigate('AddRecipeasy', {
       mode: 'add',
       onSave: (recipe) => {
-        setRecipes(prev => [...prev, recipe]); 
+        setRecipes(prev => [...prev, recipe]); // recette incerer dans la list 
       },
     });
   }
@@ -47,13 +48,10 @@ export default function RecipeListPage({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.buttonsCol}>
-          <Button title="View (random)" onPress={handleViewRandom} disabled={sorted.length === 0} />
+          <Button title="View" onPress={handleViewRandom} disabled={sorted.length === 0} />
           <View style={{ height: 10 }} />
-          <Button title="Add +" onPress={handleAdd} />
+          <Button title="Add" onPress={handleAdd} />
         </View>
-
-        <Text style={styles.title}>Données (triées par nom) :</Text>
-
         <ScrollView style={styles.jsonBox}>
           <Text style={styles.json}>{JSON.stringify(sorted, null, 2)}</Text>
         </ScrollView>
