@@ -2,7 +2,14 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Page1() {
+export default function LoginPage({ navigation }) {
+  function handleLoginPressed() {
+    navigation.navigate('RecipeList');
+  }
+
+  function handleSignUpPressed() {
+    navigation.navigate('SignUp');
+  }
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
@@ -20,11 +27,11 @@ export default function Page1() {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.btn}>
+          <TouchableOpacity style={styles.btn} onPress={handleLoginPressed}>
             <Text style={styles.btnText}>Login</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.linkWrap}>
+          <TouchableOpacity style={styles.linkWrap} onPress={handleSignUpPressed}>
             <Text style={styles.link}>Sign up!</Text>
           </TouchableOpacity>
         </View>
