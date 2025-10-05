@@ -9,7 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginPage from './LoginPage';
 import SignUpPage from './SignUpPage';
 import AddRecipeasyPage from './AddRecipeasyPage';
-import RecipeListPage from './RecipeListPage';
+import RecipeFatListPage from './RecipeFatListPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +34,7 @@ export default function App() {
 
             <Stack.Screen
               name="RecipeList"
-              component={RecipeListPage}
+              component={RecipeFatListPage}
               options={{ title: 'Recipes', headerBackVisible: false }}
             />
 

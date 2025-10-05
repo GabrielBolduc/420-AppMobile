@@ -4,15 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RadioGroup from 'react-native-radio-buttons-group';
 import { Picker } from '@react-native-picker/picker';
 
+const PAGE = '#009356ff';
+const WHITE = 'rgba(255,255,255,0.9)';
+
 export default function AddRecipeasyPage({ navigation, route }) {
-  const [mealType, setMealType] = React.useState(null); 
-  const [name, setName] = React.useState('');
-  const [hours, setHours] = React.useState('0'); 
-  const [minutes, setMinutes] = React.useState('0');
+  const [mealType, setMealType]   = React.useState(null); // "1" | "2" | "3"
+  const [name, setName]           = React.useState('');
+  const [hours, setHours]         = React.useState('0');  // strings pour Picker
+  const [minutes, setMinutes]     = React.useState('0');  // 0..59
   const [description, setDescription] = React.useState('');
 
-  const mode   = route?.params?.mode ?? 'add'; // Mode add / view
-  const onSave = route?.params?.onSave;  // callback reçu de la liste 
+  const mode = route?.params?.mode ?? 'add'; // 'add' | 'view'
 
   // Préremplir en view, vider en add
   React.useEffect(() => {
@@ -35,25 +37,22 @@ export default function AddRecipeasyPage({ navigation, route }) {
     { id: '3', label: 'Dinner',    value: 'dinner',    borderColor: 'rgba(255,255,255,0.9)' },
   ];
 
+  // Certaines versions de RadioGroup renvoient un id ou un tableau
   const handleMealType = (arg) => {
-    if (Array.isArray(arg)) {
-      const sel = arg.find(b => b.selected);
-      setMealType(sel ? sel.id : null);
-    } else {
-      setMealType(arg);
-    }
+    const id = Array.isArray(arg) ? (arg.find(b => b.selected)?.id ?? null) : arg;
+    setMealType(id);
   };
 
-  // Validation en creation uniquement
+  // Validation (création uniquement)
   function validate() {
     const h = parseInt(hours, 10);
     const m = parseInt(minutes, 10);
     const errs = [];
     if (!mealType) errs.push('Catégorie requise.');
     if (!name.trim()) errs.push('Nom requis, non vide.');
-    if (!(h >= 0 && h <= 12)) errs.push('Heures doit être entre 0 et 12.');
-    if (!(m >= 0 && m <= 59)) errs.push('Minutes doit être entre 0 et 59.');
-    if ((h * 60 + m) <= 0) errs.push('La durée totale doit être > 0.');
+    if (h < 0 || h > 12) errs.push('Heures doit être entre 0 et 12.');
+    if (m < 0 || m > 59) errs.push('Minutes doit être entre 0 et 59.');
+    if (h * 60 + m <= 0) errs.push('La durée totale doit être > 0.');
     if (errs.length) { Alert.alert('Validation', errs.join('\n')); return false; }
     return true;
   }
@@ -70,13 +69,18 @@ export default function AddRecipeasyPage({ navigation, route }) {
       description: description.trim(),
     };
 
-    // Appelle le callback de la liste puis revient à la liste existante
-    if (typeof onSave === 'function') {
-      onSave(recipe);
-    }
-    navigation.goBack();
+    // ⚠️ IMPORTANT: le nom de la route doit être EXACTEMENT "RecipeList" dans App.js
+    navigation.navigate({
+      name: 'RecipeList',
+      params: { recipe, nonce: Date.now() }, // 100% sérialisable
+      merge: true,                           // réutilise l'écran existant
+    });
+
+    // Optionnel si tu préfères l’animation de retour:
+    // navigation.goBack();
   }
-  
+
+  // Delete en édition uniquement — retourne juste à la liste (aucune suppression)
   function handleDelete() {
     if (mode !== 'view') return;
     navigation.goBack();
@@ -109,7 +113,7 @@ export default function AddRecipeasyPage({ navigation, route }) {
           style={[styles.picker, styles.inputWhite]}
           dropdownIconColor="#fff"
         >
-          {[...Array(13).keys()].map(h => (
+          {Array.from({ length: 13 }, (_, h) => (
             <Picker.Item key={h} label={`${h} h`} value={String(h)} />
           ))}
         </Picker>
@@ -146,55 +150,18 @@ export default function AddRecipeasyPage({ navigation, route }) {
     </SafeAreaView>
   );
 }
-const PAGE = '#009356ff';
-const WHITE = 'rgba(255,255,255,0.9)';
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: PAGE,
-    padding: 17,
-  },
-  label: {
-    color: WHITE,
-    fontWeight: '700',
-    marginRight: 10,
-  },
+  container: { flex: 1, backgroundColor: PAGE, padding: 17 },
+  label: { color: WHITE, fontWeight: '700', marginRight: 10 },
   input: {
-    borderWidth: 2,
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    minHeight: 50,
-    color: 'white',
-    marginVertical: 18,
+    borderWidth: 2, borderRadius: 4, paddingHorizontal: 12,
+    minHeight: 50, color: 'white', marginVertical: 18,
   },
-  inputWhite: {
-    borderColor: WHITE,
-  },
-  durationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  picker: {
-    flex: 1,
-    height: 50,
-    color: WHITE,
-    borderRadius: 4,
-  },
-  colon: {
-    color: WHITE,
-    fontSize: 18,
-    marginHorizontal: 8,
-    fontWeight: '700',
-  },
-  textArea: {
-    minHeight: 300,
-    textAlignVertical: 'top',
-  },
-  radioLabel: {
-    color: WHITE,
-    fontSize: 16,
-    fontWeight: '500',
-  },
+  inputWhite: { borderColor: WHITE },
+  durationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
+  picker: { flex: 1, height: 50, color: WHITE, borderRadius: 4 },
+  colon: { color: WHITE, fontSize: 18, marginHorizontal: 8, fontWeight: '700' },
+  textArea: { minHeight: 300, textAlignVertical: 'top' },
+  radioLabel: { color: WHITE, fontSize: 16, fontWeight: '500' },
 });

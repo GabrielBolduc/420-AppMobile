@@ -75,7 +75,6 @@ const styles = StyleSheet.create({
   },
   json: {
     color: 'white',
-    fontSize: 12,
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
+    fontSize: 12
   },
 });
