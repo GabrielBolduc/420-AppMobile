@@ -7,7 +7,7 @@ const PAGE = '#009356ff';
 export default function RecipeListPage({ navigation }) {
   const [recipes, setRecipes] = useState([]);
 
-  // Tri par nom (ordre croissant)
+  // Tri par nom
   const sorted = useMemo(
     () => [...recipes].sort((a, b) => a.name.localeCompare(b.name)),
     [recipes]
