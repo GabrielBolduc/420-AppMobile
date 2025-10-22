@@ -10,10 +10,7 @@ const PAGE = '#009356ff';
 
 
 const seedRecipes = [
-  { category: 1, name: 'A0', durationHours: 0, durationMinutes: 4,  description: 'description1' },
-  { category: 2, name: 'B1', durationHours: 1, durationMinutes: 30, description: 'description2' },
-  { category: 3, name: 'C1', durationHours: 1, durationMinutes: 10, description: 'description3' },
-  { category: 2, name: 'B2', durationHours: 3, durationMinutes: 30, description: 'description4' },
+  
 ];
 
 function fmtDuration(h, m) {
