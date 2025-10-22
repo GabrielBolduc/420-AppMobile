@@ -16,7 +16,6 @@ export default function AddRecipeasyPage({ navigation, route }) {
 
   const mode = route?.params?.mode ?? 'add'; // 'add' | 'view'
 
-  // Préremplir en view, vider en add
   React.useEffect(() => {
     const r = route?.params?.recipe;
     if (mode === 'view' && r) {
@@ -37,13 +36,11 @@ export default function AddRecipeasyPage({ navigation, route }) {
     { id: '3', label: 'Dinner',    value: 'dinner',    borderColor: 'rgba(255,255,255,0.9)' },
   ];
 
-  // Certaines versions de RadioGroup renvoient un id ou un tableau
   const handleMealType = (arg) => {
     const id = Array.isArray(arg) ? (arg.find(b => b.selected)?.id ?? null) : arg;
     setMealType(id);
   };
 
-  // Validation (création uniquement)
   function validate() {
     const h = parseInt(hours, 10);
     const m = parseInt(minutes, 10);
@@ -69,18 +66,15 @@ export default function AddRecipeasyPage({ navigation, route }) {
       description: description.trim(),
     };
 
-    // ⚠️ IMPORTANT: le nom de la route doit être EXACTEMENT "RecipeList" dans App.js
     navigation.navigate({
       name: 'RecipeList',
-      params: { recipe, nonce: Date.now() }, // 100% sérialisable
-      merge: true,                           // réutilise l'écran existant
+      params: { recipe, nonce: Date.now() },
+      merge: true,                          
     });
 
-    // Optionnel si tu préfères l’animation de retour:
-    // navigation.goBack();
   }
 
-  // Delete en édition uniquement — retourne juste à la liste (aucune suppression)
+
   function handleDelete() {
     if (mode !== 'view') return;
     navigation.goBack();
