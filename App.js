@@ -7,10 +7,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AuthProvider } from './context/AuthProvider'; // <-- assure-toi que ce fichier existe
 
-import LoginPage from './LoginPage';
-import SignUpPage from './SignUpPage';
-import AddRecipeasyPage from './AddRecipeasyPage';
-import RecipeFatListPage from './RecipeFatListPage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import AddRecipeasyPage from './pages/AddRecipeasyPage';
+import RecipeFatListPage from './pages/RecipeFatListPage';
 
 const Stack = createNativeStackNavigator();
 

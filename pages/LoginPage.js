@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from './context/AuthProvider'; // adapte le path si besoin
+import { useAuth } from '../context/AuthProvider'; // adapte le path si besoin
 
 export default function LoginPage({ navigation }) {
   const { login } = useAuth();
