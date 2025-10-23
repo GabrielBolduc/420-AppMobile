@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from './context/AuthProvider'; // adapte le path si besoin
+import { useAuth } from '../context/AuthProvider'; 
 
 export default function LoginPage({ navigation }) {
   const { login } = useAuth();
@@ -17,7 +17,6 @@ export default function LoginPage({ navigation }) {
     setLoading(true);
     try {
       await login(username.trim(), password);
-      // navigation vers la liste
       navigation.reset({
         index: 0,
         routes: [{ name: 'RecipeList' }],

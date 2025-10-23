@@ -1,11 +1,14 @@
+// services/martha.js
 const BASE_URL = "http://martha.jh.shawinigan.info";
 
+/**
+ * httpPost: bas niveau -> POST to /queries/:queryName/execute
+ * - authBase64: string for header 'auth' (base64 username:password)
+ * - body: plain JS object (sent as JSON) or {} if none
+ */
 async function httpPost(queryName, authBase64, body = {}) {
   const url = `${BASE_URL}/queries/${queryName}/execute`;
-
-  const headers = {
-    'Content-Type': 'application/json',
-  };
+  const headers = { 'Content-Type': 'application/json' };
   if (authBase64) headers['auth'] = authBase64;
 
   let resp;
@@ -13,7 +16,7 @@ async function httpPost(queryName, authBase64, body = {}) {
     resp = await fetch(url, {
       method: 'POST',
       headers,
-      body: Object.keys(body).length ? JSON.stringify(body) : undefined,
+      body: body && Object.keys(body).length ? JSON.stringify(body) : undefined,
     });
   } catch (err) {
     throw new Error(`Network error: ${err.message}`);
@@ -29,67 +32,47 @@ async function httpPost(queryName, authBase64, body = {}) {
   if (!json || typeof json.success === 'undefined') {
     throw new Error('Invalid API response');
   }
-
   if (!json.success) {
-    const message = json.error ?? 'Unknown API error';
-    throw new Error(message);
+    throw new Error(json.error ?? 'API error');
   }
-
   return json;
 }
 
+/* ---------------------------
+   High-level helpers (queries)
+   --------------------------- */
 
-// Authentification : select-user-auth
+// Auth (expects query named 'select-user-auth' returning user row(s))
 export async function loginUser(authBase64, { username, password }) {
-  // calls select-user-auth with body {username, password}
   const json = await httpPost('select-user-auth', authBase64, { username, password });
   const data = json.data ?? [];
   if (!Array.isArray(data) || data.length === 0) {
     throw new Error('Invalid username or password');
   }
-  // return first user row (id, username)
   return data[0];
 }
 
-// Recipes
+// select-recipes (optionally take user id)
 export async function fetchRecipes(authBase64, userId) {
-  // select-recipes expects body id = user id
-  const json = await httpPost('select-recipes', authBase64, { id: Number(userId) });
-  const data = json.data ?? [];
-  return data;
+  const body = (typeof userId !== 'undefined' && userId !== null) ? { id: Number(userId) } : {};
+  const json = await httpPost('select-recipes', authBase64, body);
+  return json.data ?? [];
 }
 
-export async function insertRecipe(authBase64, recipe) {
-
-  const body = {
-    category: String(recipe.category),
-    name: recipe.name,
-    duration_hours: Number(recipe.durationHours),
-    duration_minutes: Number(recipe.durationMinutes),
-    description: recipe.description,
-    user_id: Number(recipe.user_id),
-  };
-  const json = await httpPost('insert-recipe', authBase64, body);
-  return {
-    lastInsertId: json.lastInsertId ?? null,
-  };
+// insert-recipe -> returns lastInsertId maybe
+export async function insertRecipe(authBase64, recipeBody) {
+  const json = await httpPost('insert-recipe', authBase64, recipeBody);
+  return { lastInsertId: json.lastInsertId ?? null };
 }
 
-export async function updateRecipe(authBase64, recipe) {
-  const body = {
-    id: Number(recipe.id),
-    category: String(recipe.category),
-    name: recipe.name,
-    duration_hours: Number(recipe.durationHours),
-    duration_minutes: Number(recipe.durationMinutes),
-    description: recipe.description,
-  };
-  const json = await httpPost('update-recipe', authBase64, body);
+// update-recipe
+export async function updateRecipe(authBase64, recipeBody) {
+  await httpPost('update-recipe', authBase64, recipeBody);
   return { ok: true };
 }
 
-export async function deleteRecipe(authBase64, id, user_id) {
-  const body = { id: Number(id), user_id: Number(user_id) };
-  const json = await httpPost('delete-recipe', authBase64, body);
+// delete-recipe
+export async function deleteRecipe(authBase64, recipeBody) {
+  await httpPost('delete-recipe', authBase64, recipeBody);
   return { ok: true };
 }
