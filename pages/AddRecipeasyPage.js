@@ -8,13 +8,13 @@ const PAGE = '#009356ff';
 const WHITE = 'rgba(255,255,255,0.9)';
 
 export default function AddRecipeasyPage({ navigation, route }) {
-  const [mealType, setMealType]   = React.useState(null); // "1" | "2" | "3"
+  const [mealType, setMealType]   = React.useState(null); 
   const [name, setName]           = React.useState('');
-  const [hours, setHours]         = React.useState('0');  // strings pour Picker
-  const [minutes, setMinutes]     = React.useState('0');  // 0..59
+  const [hours, setHours]         = React.useState('0');  
+  const [minutes, setMinutes]     = React.useState('0'); 
   const [description, setDescription] = React.useState('');
 
-  const mode = route?.params?.mode ?? 'add'; // 'add' | 'view'
+  const mode = route?.params?.mode ?? 'add'; 
 
   React.useEffect(() => {
     const r = route?.params?.recipe;
