@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { AuthProvider } from './context/AuthProvider'; // <-- assure-toi que ce fichier existe
+import { AuthProvider } from './context/AuthProvider'; 
 
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
