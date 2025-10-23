@@ -1,42 +1,64 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from './context/AuthProvider'; // adapte le path si besoin
 
 export default function LoginPage({ navigation }) {
-  function handleLoginPressed() {
-    navigation.navigate('RecipeList');
+  const { login } = useAuth();
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  async function handleLogin() {
+    if (!username.trim() || !password) {
+      Alert.alert('Erreur', 'Veuillez fournir username et password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await login(username.trim(), password);
+      // navigation vers la liste
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'RecipeList' }],
+      });
+    } catch (err) {
+      Alert.alert('Login failed', err.message || 'Impossible de se connecter.');
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleSignUpPressed() {
-    navigation.navigate('SignUp');
-  }
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.form}>
-          <TextInput
-            placeholder="Username"
-            placeholderTextColor="rgba(255,255,255,0.8)"
-            style={styles.input}
-          />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.form}>
+        <TextInput
+          placeholder="Username"
+          placeholderTextColor="rgba(255,255,255,0.8)"
+          style={styles.input}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+        />
 
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="rgba(255,255,255,0.8)"
-            style={styles.input}
-            secureTextEntry
-          />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="rgba(255,255,255,0.8)"
+          style={styles.input}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-          <TouchableOpacity style={styles.btn} onPress={handleLoginPressed}>
-            <Text style={styles.btnText}>Login</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.btn} onPress={handleLogin} disabled={loading}>
+          {loading ? <ActivityIndicator color="#1b1b1b" /> : <Text style={styles.btnText}>Login</Text>}
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.linkWrap} onPress={handleSignUpPressed}>
-            <Text style={styles.link}>Sign up!</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </SafeAreaProvider>
+        <TouchableOpacity style={styles.linkWrap} onPress={() => navigation.navigate('SignUp')}>
+          <Text style={styles.link}>Sign up!</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
