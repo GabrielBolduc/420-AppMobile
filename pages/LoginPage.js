@@ -1,111 +1,65 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthProvider'; 
+import UserCredentials from '../models/UserCredentials.js';
+import { AuthContext } from '../context/AuthProvider.js';
 
 export default function LoginPage({ navigation }) {
-  const { login } = useAuth();
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+  const [credentials, setCredentials] = useState(new UserCredentials({ username: '', password: '' }));
+  const { logIn } = useContext(AuthContext);
 
   async function handleLogin() {
-    if (!username.trim() || !password) {
-      Alert.alert('Erreur', 'Veuillez fournir username et password.');
-      return;
-    }
-    setLoading(true);
     try {
-      await login(username.trim(), password);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'RecipeList' }],
-      });
+      const success = await logIn(credentials);
+      if (success) {
+        navigation.reset({ index: 0, routes: [{ name: 'RecipeList' }] });
+      } else {
+        Alert.alert('Erreur', 'Identifiants invalides.');
+      }
     } catch (err) {
-      Alert.alert('Login failed', err.message || 'Impossible de se connecter.');
-    } finally {
-      setLoading(false);
+      Alert.alert('Erreur', err.message || 'Impossible de se connecter.');
     }
+  }
+
+  function handleSignUp() {
+    navigation.navigate('SignUp');
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.form}>
-        <TextInput
-          placeholder="Username"
-          placeholderTextColor="rgba(255,255,255,0.8)"
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
+      <TextInput
+        style={[styles.input, styles.inputWhite]}
+        placeholder="Username"
+        placeholderTextColor="rgba(255,255,255,0.8)"
+        value={credentials.username}
+        onChangeText={text => setCredentials(new UserCredentials({ ...credentials, username: text }))}
+      />
 
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="rgba(255,255,255,0.8)"
-          style={styles.input}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+      <TextInput
+        style={[styles.input, styles.inputWhite]}
+        placeholder="Password"
+        placeholderTextColor="rgba(255,255,255,0.8)"
+        secureTextEntry
+        value={credentials.password}
+        onChangeText={text => setCredentials(new UserCredentials({ ...credentials, password: text }))}
+      />
 
-        <TouchableOpacity style={styles.btn} onPress={handleLogin} disabled={loading}>
-          {loading ? <ActivityIndicator color="#1b1b1b" /> : <Text style={styles.btnText}>Login</Text>}
-        </TouchableOpacity>
+      <View style={{ marginTop: 25, width: '100%' }}>
+        <Button title="Login" color="#fce307ff" onPress={handleLogin} />
+      </View>
 
-        <TouchableOpacity style={styles.linkWrap} onPress={() => navigation.navigate('SignUp')}>
-          <Text style={styles.link}>Sign up!</Text>
-        </TouchableOpacity>
+      <View style={{ marginTop: 15, width: '100%' }}>
+        <Button title="Sign Up" color="#fce307ff" onPress={handleSignUp} />
       </View>
     </SafeAreaView>
   );
 }
 
 const PAGE = '#009356ff';
-const LOGIN = '#fce307ff';
+const WHITE = 'rgba(255,255,255,0.9)';
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: PAGE,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-  },
-  form: {
-    alignItems: 'center',
-  },
-  input: {
-    width: '100%',
-    height: 56,
-    borderWidth: 2,
-    borderColor: 'white',
-    borderRadius: 4,
-    paddingHorizontal: 16,
-    marginBottom: 18,
-    color: 'white',
-    fontSize: 16,
-    backgroundColor: 'transparent',
-  },
-  btn: {
-    marginTop: 12,
-    backgroundColor: LOGIN,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 10,
-    minWidth: 120,
-    alignItems: 'center',
-  },
-  btnText: {
-    color: '#1b1b1b',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  linkWrap: {
-    marginTop: 36,
-  },
-  link: {
-    color: 'blue',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: PAGE, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  input: { borderWidth: 2, borderRadius: 4, paddingHorizontal: 12, height: 50, color: 'white', marginVertical: 10, width: '100%' },
+  inputWhite: { borderColor: WHITE },
 });

@@ -1,17 +1,22 @@
-// models/Recipe.js
 export default class Recipe {
-  constructor({ id = null, category = 1, name = '', durationHours = 0, durationMinutes = 0, description = '', user_id = null } = {}) {
+  constructor({ id, category, name, duration_hours, duration_minutes, description, user_id }) {
     this.id = id;
     this.category = category;
     this.name = name;
-    this.durationHours = durationHours;
-    this.durationMinutes = durationMinutes;
+    this.durationHours = duration_hours;
+    this.durationMinutes = duration_minutes;
     this.description = description;
-    this.user_id = user_id;
+    this.userId = user_id;
   }
 
-  formattedDuration() {
-    const mm = String(this.durationMinutes).padStart(2, '0');
-    return `${this.durationHours}h${mm}`;
+  toJSON() {
+    return {
+      category: this.category,
+      name: this.name,
+      duration_hours: this.durationHours,
+      duration_minutes: this.durationMinutes,
+      description: this.description,
+      user_id: this.userId
+    };
   }
 }

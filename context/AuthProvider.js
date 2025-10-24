@@ -1,49 +1,31 @@
-import React, { createContext, useContext, useState } from 'react';
-import { Buffer } from 'buffer'; // polyfill pour base64
-import * as Martha from '../services/martha';
+// context/AuthProvider.js
+import React, { createContext, useState } from 'react';
+import authService from '../services/authService.js';
 
-const AuthContext = createContext({
-  user: null,
-  auth: null,
-  login: async () => {},
-  logout: () => {},
-});
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);   // { id, username, ... }
-  const [auth, setAuth] = useState(null);   // base64 string
+  const [user, setUser] = useState(authService.currentUser);
 
-  function encodeAuth(username, password) {
-    const pair = `${username}:${password}`;
-    try {
-      // Buffer -> base64 works in RN with 'buffer' polyfill
-      return Buffer.from(pair).toString('base64');
-    } catch (e) {
-      // fallback
-      return global.btoa ? global.btoa(pair) : Buffer.from(pair).toString('base64');
-    }
-  }
+  const logIn = async (credentials) => {
+    const success = await authService.logIn(credentials);
+    setUser(authService.currentUser);
+    return success;
+  };
 
-  async function login(username, password) {
-    const authBase64 = encodeAuth(username, password);
-    // call martha login (select-user-auth)
-    const u = await Martha.loginUser(authBase64, { username, password });
-    setUser(u);
-    setAuth(authBase64);
-    return u;
-  }
+  const signUp = async (credentials) => {
+    const success = await authService.signUp(credentials);
+    setUser(authService.currentUser);
+    return success;
+  };
 
-  function logout() {
+  const logOut = () => {
+    authService.logOut();
     setUser(null);
-    setAuth(null);
-  }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, auth, login, logout }}>
+    <AuthContext.Provider value={{ user, logIn, signUp, logOut }}>
       {children}
     </AuthContext.Provider>
   );

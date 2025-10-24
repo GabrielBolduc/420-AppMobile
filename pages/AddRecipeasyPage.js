@@ -3,159 +3,119 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RadioGroup from 'react-native-radio-buttons-group';
 import { Picker } from '@react-native-picker/picker';
+import { addRecipe, updateRecipe, deleteRecipe } from '../services/recipeService.js';
+import { AuthContext } from '../context/AuthProvider.js';
 
 const PAGE = '#009356ff';
 const WHITE = 'rgba(255,255,255,0.9)';
 
 export default function AddRecipeasyPage({ navigation, route }) {
-  const [mealType, setMealType]   = React.useState(null); 
-  const [name, setName]           = React.useState('');
-  const [hours, setHours]         = React.useState('0');  
-  const [minutes, setMinutes]     = React.useState('0'); 
+  const { user } = React.useContext(AuthContext);
+  const [mealType, setMealType] = React.useState(null);
+  const [name, setName] = React.useState('');
+  const [hours, setHours] = React.useState('0');
+  const [minutes, setMinutes] = React.useState('0');
   const [description, setDescription] = React.useState('');
 
-  const mode = route?.params?.mode ?? 'add'; 
+  const mode = route?.params?.mode ?? 'add';
+  const currentRecipe = route?.params?.recipe;
 
   React.useEffect(() => {
-    const r = route?.params?.recipe;
-    if (mode === 'view' && r) {
-      setMealType(r.category != null ? String(r.category) : null);
-      setName(r.name ?? '');
-      setHours(String(r.durationHours ?? 0));
-      setMinutes(String(r.durationMinutes ?? 0));
-      setDescription(r.description ?? '');
+    if ((mode === 'view' || mode === 'edit') && currentRecipe) {
+      setMealType(currentRecipe.category ? String(currentRecipe.category) : null);
+      setName(currentRecipe.name ?? '');
+      setHours(String(currentRecipe.durationHours ?? currentRecipe.duration_hours ?? 0));
+      setMinutes(String(currentRecipe.durationMinutes ?? currentRecipe.duration_minutes ?? 0));
+      setDescription(currentRecipe.description ?? '');
     }
     if (mode === 'add') {
       setMealType(null); setName(''); setHours('0'); setMinutes('0'); setDescription('');
     }
-  }, [mode, route?.params?.recipe]);
+  }, [mode, currentRecipe]);
 
-  const radioOptions = [
-    { id: '1', label: 'Breakfast', value: 'breakfast', borderColor: WHITE },
-    { id: '2', label: 'Lunch',     value: 'lunch',     borderColor: 'rgba(255,255,255,0.9)' },
-    { id: '3', label: 'Dinner',    value: 'dinner',    borderColor: 'rgba(255,255,255,0.9)' },
-  ];
-
-  const handleMealType = (arg) => {
-    const id = Array.isArray(arg) ? (arg.find(b => b.selected)?.id ?? null) : arg;
-    setMealType(id);
-  };
-
-  function validate() {
-    const h = parseInt(hours, 10);
-    const m = parseInt(minutes, 10);
-    const errs = [];
-    if (!mealType) errs.push('Catégorie requise.');
-    if (!name.trim()) errs.push('Nom requis, non vide.');
-    if (h < 0 || h > 12) errs.push('Heures doit être entre 0 et 12.');
-    if (m < 0 || m > 59) errs.push('Minutes doit être entre 0 et 59.');
-    if (h * 60 + m <= 0) errs.push('La durée totale doit être > 0.');
-    if (errs.length) { Alert.alert('Validation', errs.join('\n')); return false; }
-    return true;
-  }
-
-  function handleSave() {
-    if (mode !== 'add') return;
-    if (!validate()) return;
-
+  async function handleSave() {
     const recipe = {
+      id: currentRecipe?.id,
       category: mealType ? parseInt(mealType, 10) : null,
       name: name.trim(),
       durationHours: parseInt(hours, 10) || 0,
       durationMinutes: parseInt(minutes, 10) || 0,
       description: description.trim(),
+      user_id: user?.id,
     };
 
-    navigation.navigate({
-      name: 'RecipeList',
-      params: { recipe, nonce: Date.now() },
-      merge: true,                          
-    });
+    try {
+      if (mode === 'add') await addRecipe(recipe);
+      else if (mode === 'edit') await updateRecipe(recipe);
 
+      navigation.navigate({
+        name: 'RecipeList',
+        params: { recipe, nonce: Date.now() },
+        merge: true,
+      });
+    } catch (err) {
+      Alert.alert('Erreur', err.message || 'Impossible de sauvegarder la recette.');
+    }
   }
 
-
-  function handleDelete() {
-    if (mode !== 'view') return;
-    navigation.goBack();
+  async function handleDelete() {
+    if (!currentRecipe?.id) return;
+    try {
+      await deleteRecipe(currentRecipe.id, user?.id);
+      navigation.navigate({ name: 'RecipeList', params: { nonce: Date.now() }, merge: true });
+    } catch (err) {
+      Alert.alert('Erreur', err.message || 'Impossible de supprimer la recette.');
+    }
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <RadioGroup
-        radioButtons={radioOptions}
-        selectedId={mealType}
-        onPress={handleMealType}
-        layout="row"
-        labelStyle={styles.radioLabel}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: PAGE, padding: 16 }}>
+      <Text style={styles.label}>Category</Text>
+      <Picker
+        selectedValue={mealType}
+        style={styles.input}
+        onValueChange={val => setMealType(val)}
+      >
+        <Picker.Item label="Select category" value={null} />
+        <Picker.Item label="Coffee" value="1" />
+        <Picker.Item label="Hamburger" value="2" />
+        <Picker.Item label="Dinner" value="3" />
+      </Picker>
 
+      <Text style={styles.label}>Name</Text>
+      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Name" placeholderTextColor={WHITE} />
+
+      <Text style={styles.label}>Duration Hours</Text>
+      <TextInput style={styles.input} value={hours} onChangeText={setHours} keyboardType="numeric" placeholder="Hours" placeholderTextColor={WHITE} />
+
+      <Text style={styles.label}>Duration Minutes</Text>
+      <TextInput style={styles.input} value={minutes} onChangeText={setMinutes} keyboardType="numeric" placeholder="Minutes" placeholderTextColor={WHITE} />
+
+      <Text style={styles.label}>Description</Text>
       <TextInput
-        style={[styles.input, styles.inputWhite]}
-        placeholder="Name"
-        placeholderTextColor="rgba(255,255,255,0.85)"
-        value={name}
-        onChangeText={setName}
-      />
-
-      <View style={styles.durationRow}>
-        <Text style={styles.label}>Duration</Text>
-
-        <Picker
-          selectedValue={hours}
-          onValueChange={setHours}
-          style={[styles.picker, styles.inputWhite]}
-          dropdownIconColor="#fff"
-        >
-          {Array.from({ length: 13 }, (_, h) => (
-            <Picker.Item key={h} label={`${h} h`} value={String(h)} />
-          ))}
-        </Picker>
-
-        <Text style={styles.colon}> : </Text>
-
-        <Picker
-          selectedValue={minutes}
-          onValueChange={setMinutes}
-          style={[styles.picker, styles.inputWhite]}
-          dropdownIconColor="#fff"
-        >
-          {Array.from({ length: 60 }, (_, m) => (
-            <Picker.Item key={m} label={`${m} mins`} value={String(m)} />
-          ))}
-        </Picker>
-      </View>
-
-      <TextInput
-        style={[styles.input, styles.inputWhite, styles.textArea]}
-        placeholder="Description"
-        placeholderTextColor="rgba(255,255,255,0.85)"
+        style={[styles.input, { height: 80 }]}
         value={description}
         onChangeText={setDescription}
+        placeholder="Description"
+        placeholderTextColor={WHITE}
         multiline
       />
 
-      <View style={{ marginTop: 20 }}>
-        {mode === 'add'
-          ? <Button title="Save" color="#fce307ff" onPress={handleSave} />
-          : <Button title="Delete" color="#fce307ff" onPress={handleDelete} />
-        }
-      </View>
+      <Button title={mode === 'view' ? 'Edit' : 'Save'} color="#fce307ff" onPress={() => {
+        if (mode === 'view') navigation.setParams({ mode: 'edit' });
+        else handleSave();
+      }} />
+
+      {mode !== 'add' && (
+        <View style={{ marginTop: 10 }}>
+          <Button title="Delete" color="#ff3333" onPress={handleDelete} />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: PAGE, padding: 17 },
-  label: { color: WHITE, fontWeight: '700', marginRight: 10 },
-  input: {
-    borderWidth: 2, borderRadius: 4, paddingHorizontal: 12,
-    minHeight: 50, color: 'white', marginVertical: 18,
-  },
-  inputWhite: { borderColor: WHITE },
-  durationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
-  picker: { flex: 1, height: 50, color: WHITE, borderRadius: 4 },
-  colon: { color: WHITE, fontSize: 18, marginHorizontal: 8, fontWeight: '700' },
-  textArea: { minHeight: 300, textAlignVertical: 'top' },
-  radioLabel: { color: WHITE, fontSize: 16, fontWeight: '500' },
+  label: { color: 'white', fontWeight: '600', marginTop: 12 },
+  input: { backgroundColor: 'transparent', color: 'white', borderWidth: 2, borderColor: 'white', borderRadius: 4, padding: 10, marginTop: 6 },
 });
