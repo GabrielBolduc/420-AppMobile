@@ -6,13 +6,13 @@ class AuthService {
   get currentUser() {
     return this.#currentUser;
   }
-
+  
   async signUp(credentials) {
     const response = await fetch("http://martha.jh.shawinigan.info/queries/insert-user/execute", {
       method: 'POST',
       body: JSON.stringify(credentials),
       headers: {
-        'auth': 'pU500EsNf6*3qv',
+        'auth': 'Z2FicmllbDpwVTUwMEVzTmY2KjNxdg==',
         'Content-Type': 'application/json'
       }
     }).then(r => r.json());
@@ -29,7 +29,7 @@ class AuthService {
       method: 'POST',
       body: JSON.stringify(credentials),
       headers: {
-        'auth': 'Z2FicmllbDpQVTUwMEVzTmY2KjNxdg==',
+        'auth': 'Z2FicmllbDpwVTUwMEVzTmY2KjNxdg==',
         'Content-Type': 'application/json'
       }
     }).then(r => r.json());

@@ -1,7 +1,7 @@
 import Recipe from '../models/Recipe.js';
 
 const BASE_URL = "http://martha.jh.shawinigan.info/queries";
-const AUTH = 'Z2FicmllbDpQVTUwMEVzTmY2KjNxdg==';
+const AUTH = 'Z2FicmllbDpwVTUwMEVzTmY2KjNxdg==';
 
 async function marthaFetch(queryName, body = {}, authHeader = AUTH) {
   const response = await fetch(`${BASE_URL}/${queryName}/execute`, {
